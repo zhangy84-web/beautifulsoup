@@ -1,1 +1,3 @@
 # Milestone-3
+
+Milestone-2 adds the ability to replace name, while Milestone-3 adds a more flexible way to replace not only names, but also attributes, in various ways. Since all the things that milestone-2 does can be done by work in milestone-3, I would suggest to remove the original tag replacement, if it is not published yet. In fact, within milestonre-3, we only need the xformer since it can do whatever the other two name/attr-former can do, so let's just keep xformer.
