@@ -666,6 +666,17 @@ class BeautifulSoup(Tag):
         ):
             self.popTag()
 
+    def __iter__(self) -> Iterator[PageElement]:
+        """Make soup iterable using dfs
+        """
+        def dfs(node):
+            yield node
+            if hasattr(node, 'contents'):
+                for child in node.contents:
+                    yield from dfs(child)
+
+        return dfs(self)
+
     def reset(self) -> None:
         """Reset this object to a state as though it had never parsed any
         markup.

@@ -18,6 +18,7 @@ from bs4.element import (
     AttributeValueList,
     XMLAttributeDict,
     Comment,
+    Doctype,
     PYTHON_SPECIFIC_ENCODINGS,
     Tag,
     NavigableString,
@@ -241,6 +242,96 @@ class TestConstructor(SoupTest):
             f"Incoming markup is of an invalid type: {bad_markup!r}. Markup must be a string, a bytestring, or an open filehandle."
             in str(exc_info.value)
         )
+
+    def test_soup_iteration_tags_parallel(self):
+        # Test if it is iterable on tags with no depth
+        html_doc = "<p1></p1><p2></p2><p3></p3>"
+        soup = self.soup(html_doc)
+        
+        nodes = []
+        for node in soup:
+            nodes.append(node)
+        
+        # Should contain 4 nodes, [self, p1, p2, p3]
+        assert len(nodes) == 4
+        assert isinstance(nodes[0], BeautifulSoup)
+        assert nodes[0] == soup
+        assert isinstance(nodes[1], Tag)
+        assert nodes[1].name == "p1"
+        assert isinstance(nodes[2], Tag)
+        assert nodes[2].name == "p2"
+        assert isinstance(nodes[2], Tag)
+        assert nodes[3].name == "p3"
+
+    def test_soup_iteration_tags_depth(self):
+        # Test if it is iterable on tags with depth
+        html_doc = "<p1><p11></p11></p1>"
+        soup = self.soup(html_doc)
+        
+        nodes = []
+        for node in soup:
+            nodes.append(node)
+        
+        # Should contain 3 nodes, [self, p1, p11]
+        assert len(nodes) == 3
+        assert isinstance(nodes[0], BeautifulSoup)
+        assert nodes[0] == soup
+        assert isinstance(nodes[1], Tag)
+        assert nodes[1].name == "p1"
+        assert isinstance(nodes[2], Tag)
+        assert nodes[2].name == "p11"
+
+    def test_soup_iteration_string(self):
+        # Test if string is include in iteration
+        html_doc = "<p1>string</p1>"
+        soup = self.soup(html_doc)
+        
+        nodes = []
+        for node in soup:
+            nodes.append(node)
+        
+        assert len(nodes) == 3
+        assert isinstance(nodes[0], BeautifulSoup)
+        assert nodes[0] == soup
+        assert isinstance(nodes[1], Tag)
+        assert nodes[1].name == "p1"
+        assert nodes[1].string == "string"
+        assert isinstance(nodes[2], NavigableString)
+        assert nodes[2] == "string"
+
+    def test_soup_iteration_comment(self):
+        # Test if comment is include in iteration
+        html_doc = "<p1><!-- comment --></p1>"
+        soup = self.soup(html_doc)
+        
+        nodes = []
+        for node in soup:
+            nodes.append(node)
+        
+        assert len(nodes) == 3
+        assert isinstance(nodes[0], BeautifulSoup)
+        assert nodes[0] == soup
+        assert isinstance(nodes[1], Tag)
+        assert nodes[1].name == "p1"
+        assert isinstance(nodes[2], Comment)
+        assert nodes[2] == " comment "
+
+    def test_soup_iteration_doctype(self):
+        # Test if doctype is include in iteration
+        html_doc = "<!DOCTYPE html><p1></p1></html>"
+        soup = self.soup(html_doc)
+        
+        nodes = []
+        for node in soup:
+            nodes.append(node)
+        
+        assert len(nodes) == 3
+        assert isinstance(nodes[0], BeautifulSoup)
+        assert nodes[0] == soup
+        assert isinstance(nodes[1], Doctype)
+        assert nodes[1] == "html"
+        assert isinstance(nodes[2], Tag)
+        assert nodes[2].name == "p1"
 
 
 class TestOutput(SoupTest):
